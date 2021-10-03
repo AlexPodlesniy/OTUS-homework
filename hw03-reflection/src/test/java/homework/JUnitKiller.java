@@ -15,11 +15,18 @@ import static helper.ReflectionHelper.instantiate;
 public class JUnitKiller {
 
     public static void main(String[] args) {
-        Class<?> testClass = SomeMeaninglessTest.class;
-        runClassTests(testClass);
+        runClassTests(SomeMeaninglessTest.class.getCanonicalName());
     }
 
-    public static void runClassTests(Class<?> testClass) {
+    public static void runClassTests(String testClassName) {
+        Class<?> testClass;
+        try {
+            testClass = Class.forName(testClassName);
+        } catch (ClassNotFoundException e) {
+            System.out.printf("Class with following name: %s not found", testClassName);
+            return;
+        }
+
         int totalAmount = 0;
         int passedAmount = 0;
 
@@ -40,7 +47,7 @@ public class JUnitKiller {
         }
         System.out.println("-".repeat(50));
         System.out.println(passedAmount == totalAmount ? "SUCCESS" : "FAILURE");
-        System.out.printf("Passed: %d, Failed: %d%n", passedAmount, totalAmount - passedAmount);
+        System.out.printf("Passed: %d, Failed: %d, Total: %d\n", passedAmount, totalAmount - passedAmount, totalAmount);
         System.out.println("\nFailed tests:");
         for (Method method : failedTests) {
             System.out.printf("%s.%s\n", method.getDeclaringClass().getCanonicalName(), method.getName());
